@@ -1,0 +1,2 @@
+String? currentDriverId;
+String? currentDriverName;
