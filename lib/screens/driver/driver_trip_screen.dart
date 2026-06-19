@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app.dart';                     // currentDriverId
+import '../../globals.dart';            // currentDriverId
 import '../../services/location_service.dart';
 
 class DriverTripScreen extends StatefulWidget {
@@ -12,9 +12,23 @@ class DriverTripScreen extends StatefulWidget {
 class _DriverTripScreenState extends State<DriverTripScreen> {
   final LocationService _locationService = LocationService();
   bool isTripActive = false;
+  String? _errorMessage;
 
-  void _startTrip() {
-    setState(() => isTripActive = true);
+  void _startTrip() async {
+    if (currentDriverId == null) {
+      setState(() => _errorMessage = 'معرف السائق غير موجود');
+      return;
+    }
+    // التحقق من الصلاحيات قبل البدء
+    final hasPermission = await _locationService.checkPermissions();
+    if (!hasPermission) {
+      setState(() => _errorMessage = 'يجب منح صلاحية الموقع لبدء التتبع');
+      return;
+    }
+    setState(() {
+      isTripActive = true;
+      _errorMessage = null;
+    });
     _locationService.startTracking(currentDriverId!);
   }
 
@@ -45,6 +59,11 @@ class _DriverTripScreenState extends State<DriverTripScreen> {
               color: isTripActive ? Colors.green : Colors.grey,
             ),
             const SizedBox(height: 20),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+              ),
             Text(
               isTripActive ? 'الرحلة نشطة' : 'اضغط لبدء الرحلة',
               style: const TextStyle(fontSize: 20),
