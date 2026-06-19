@@ -1,31 +1,46 @@
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter/material.dart'; // لاستخدام debugPrint
+import 'package:flutter/material.dart';
 
 class LocationService {
   Timer? _timer;
   bool _isTracking = false;
 
-  Future<bool> checkPermissions() async {
+  /// التحقق من الصلاحيات وتفعيل خدمة الموقع
+  Future<String?> checkPermissions() async {
+    // 1. التحقق من تفعيل GPS
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return 'يرجى تفعيل خدمة الموقع (GPS) من إعدادات الهاتف';
+    }
+
+    // 2. التحقق من الصلاحية
     LocationPermission permission = await Geolocator.checkPermission();
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        debugPrint('❌ صلاحية الموقع مرفوضة من المستخدم');
-        return false;
+        return 'يجب منح صلاحية الموقع لبدء التتبع';
       }
     }
+
     if (permission == LocationPermission.deniedForever) {
-      debugPrint('❌ صلاحية الموقع مرفوضة بشكل دائم، يجب تفعيلها من الإعدادات');
-      return false;
+      return 'صلاحية الموقع مرفوضة بشكل دائم. الرجاء تفعيلها من إعدادات التطبيق';
     }
-    return true;
+
+    return null; // null يعني لا توجد مشكلة
   }
 
   void startTracking(String driverId) async {
-    if (_isTracking) return; // تجنب بدء تتبع مزدوج
-    if (!await checkPermissions()) return;
+    if (_isTracking) return;
+
+    // التحقق النهائي
+    final error = await checkPermissions();
+    if (error != null) {
+      debugPrint('❌ $error');
+      return;
+    }
 
     _isTracking = true;
     debugPrint('✅ بدء تتبع الإحداثيات للسائق: $driverId');

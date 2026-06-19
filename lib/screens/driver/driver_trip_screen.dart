@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../globals.dart';            // currentDriverId
+import '../../globals.dart';
 import '../../services/location_service.dart';
 
 class DriverTripScreen extends StatefulWidget {
@@ -15,16 +15,20 @@ class _DriverTripScreenState extends State<DriverTripScreen> {
   String? _errorMessage;
 
   void _startTrip() async {
+    setState(() => _errorMessage = null);
+
     if (currentDriverId == null) {
       setState(() => _errorMessage = 'معرف السائق غير موجود');
       return;
     }
-    // التحقق من الصلاحيات قبل البدء
-    final hasPermission = await _locationService.checkPermissions();
-    if (!hasPermission) {
-      setState(() => _errorMessage = 'يجب منح صلاحية الموقع لبدء التتبع');
+
+    // التحقق من الصلاحيات وخدمة الموقع
+    final error = await _locationService.checkPermissions();
+    if (error != null) {
+      setState(() => _errorMessage = error);
       return;
     }
+
     setState(() {
       isTripActive = true;
       _errorMessage = null;
@@ -50,35 +54,57 @@ class _DriverTripScreenState extends State<DriverTripScreen> {
         title: Text(isTripActive ? 'الرحلة جارية...' : 'جاهز'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isTripActive ? Icons.directions_bus : Icons.local_parking,
-              size: 80,
-              color: isTripActive ? Colors.green : Colors.grey,
-            ),
-            const SizedBox(height: 20),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isTripActive ? Icons.directions_bus : Icons.local_parking,
+                size: 80,
+                color: isTripActive ? Colors.green : Colors.grey,
               ),
-            Text(
-              isTripActive ? 'الرحلة نشطة' : 'اضغط لبدء الرحلة',
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: isTripActive ? _endTrip : _startTrip,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isTripActive ? Colors.red : Colors.green,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
+              const SizedBox(height: 20),
+              if (_errorMessage != null)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.warning_amber, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              Text(
+                isTripActive ? 'الرحلة نشطة' : 'اضغط لبدء الرحلة',
+                style: const TextStyle(fontSize: 20),
               ),
-              child: Text(isTripActive ? 'إنهاء الرحلة' : 'بدء الرحلة'),
-            ),
-          ],
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: isTripActive ? _endTrip : _startTrip,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isTripActive ? Colors.red : Colors.green,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  textStyle: const TextStyle(fontSize: 18),
+                ),
+                child: Text(isTripActive ? 'إنهاء الرحلة' : 'بدء الرحلة'),
+              ),
+            ],
+          ),
         ),
       ),
     );

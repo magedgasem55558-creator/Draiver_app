@@ -1,7 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
+
+    <!-- صلاحية الإنترنت -->
     <uses-permission android:name="android.permission.INTERNET"/>
     
+    <!-- صلاحيات الموقع (GPS) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    
+    <!-- صلاحية الموقع في الخلفية (اختياري، للتتبع عند قفل الشاشة) -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
     <application
         android:label="driver_tracker"
         android:name="${applicationName}"
@@ -28,7 +36,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-    
+
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
@@ -36,4 +44,3 @@
         </intent>
     </queries>
 </manifest>
-
