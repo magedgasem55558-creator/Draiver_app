@@ -9,13 +9,11 @@ class LocationService {
 
   /// التحقق من الصلاحيات وتفعيل خدمة الموقع
   Future<String?> checkPermissions() async {
-    // 1. التحقق من تفعيل GPS
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return 'يرجى تفعيل خدمة الموقع (GPS) من إعدادات الهاتف';
     }
 
-    // 2. التحقق من الصلاحية
     LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
@@ -29,13 +27,12 @@ class LocationService {
       return 'صلاحية الموقع مرفوضة بشكل دائم. الرجاء تفعيلها من إعدادات التطبيق';
     }
 
-    return null; // null يعني لا توجد مشكلة
+    return null;
   }
 
   void startTracking(String driverId) async {
     if (_isTracking) return;
 
-    // التحقق النهائي
     final error = await checkPermissions();
     if (error != null) {
       debugPrint('❌ $error');
@@ -48,7 +45,8 @@ class LocationService {
     // إرسال أول نقطة فوراً
     _sendLocation(driverId);
 
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+    // ⏱️ تغيير المدة إلى 3 ثوانٍ بدلاً من 30 ثانية
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
       if (!_isTracking) return;
       _sendLocation(driverId);
     });
