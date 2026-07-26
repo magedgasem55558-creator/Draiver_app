@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(
-    url: 'https://nqothizwtmvbvyrxoguz.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xb3RoaXp3dG12YnZ5cnhvZ3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjc2ODEsImV4cCI6MjA4MjYwMzY4MX0.Hah1FyYJT-dQI0byUO7pNKB3NZqzkyICPh_0D_zdzis', // مفتاحك الكامل
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyC06KKxkehT1uPBT9k-r-d6MmB4RUuVy9Y",
+      authDomain: "mosque-system.firebaseapp.com",
+      projectId: "mosque-system",
+      storageBucket: "mosque-system.firebasestorage.app",
+      messagingSenderId: "905816133159",
+      appId: "1:905816133159:web:3b95d858815f91780e0802",
+    ),
   );
-  runApp(const DriverTrackerApp());
+  runApp(const MyApp());
 }
+
